@@ -1,0 +1,33 @@
+# Farooq Remote Server — Path A (Docker Compose), pinned upstream image.
+# Web-client ports 21118/21119 deliberately NOT published (owner decision 2026-09-16).
+# Verify arm64 support on the VM first: docker manifest inspect rustdesk/rustdesk-server:1.1.16
+services:
+  hbbs:
+    image: rustdesk/rustdesk-server:1.1.16
+    container_name: farooqremote-hbbs
+    command: hbbs -r ${FAROOQ_REMOTE_RELAY}
+    ports:
+      - "21115:21115"
+      - "21116:21116"
+      - "21116:21116/udp"
+    volumes:
+      - ${FAROOQ_REMOTE_ROOT:-/opt/farooqremote}/data:/root
+    depends_on:
+      - hbbr
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+  hbbr:
+    image: rustdesk/rustdesk-server:1.1.16
+    container_name: farooqremote-hbbr
+    command: hbbr
+    ports:
+      - "21117:21117"
+    volumes:
+      - ${FAROOQ_REMOTE_ROOT:-/opt/farooqremote}/data:/root
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
